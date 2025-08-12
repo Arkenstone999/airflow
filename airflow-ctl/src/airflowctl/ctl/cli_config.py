@@ -149,6 +149,19 @@ ARG_AUTH_ENVIRONMENT = Arg(
     help="The environment to run the command in",
 )
 
+# Pagination arguments
+ARG_LIMIT = Arg(
+    flags=("--limit",),
+    type=positive_int(allow_zero=False),
+    help="Maximum number of items to return. Overrides the API default limit of 100.",
+)
+ARG_OFFSET = Arg(
+    flags=("--offset",),
+    type=positive_int(allow_zero=True),
+    default=0,
+    help="Index of the first item to return.",
+)
+
 
 class ActionCommand(NamedTuple):
     """Single CLI command."""

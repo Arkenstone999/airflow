@@ -159,6 +159,42 @@ class TestAssetsOperations:
         response = client.assets.list_by_alias()
         assert response == assets_collection_response
 
+    def test_list_with_pagination(self):
+        assets_collection_response = AssetCollectionResponse(
+            assets=[self.asset_response],
+            total_entries=1,
+        )
+
+        def handle_request(request: httpx.Request) -> httpx.Response:
+            assert request.url.path == "/public/assets"
+            assert request.url.params["limit"] == "1"
+            assert request.url.params["offset"] == "2"
+            return httpx.Response(
+                200, json=json.loads(assets_collection_response.model_dump_json())
+            )
+
+        client = make_cli_api_client(transport=httpx.MockTransport(handle_request))
+        response = client.assets.list(limit=1, offset=2)
+        assert response == assets_collection_response
+
+    def test_list_beyond_default_limit(self):
+        assets_collection_response = AssetCollectionResponse(
+            assets=[self.asset_response for _ in range(150)],
+            total_entries=150,
+        )
+
+        def handle_request(request: httpx.Request) -> httpx.Response:
+            assert request.url.path == "/public/assets"
+            assert request.url.params["limit"] == "150"
+            return httpx.Response(
+                200, json=json.loads(assets_collection_response.model_dump_json())
+            )
+
+        client = make_cli_api_client(transport=httpx.MockTransport(handle_request))
+        response = client.assets.list(limit=150)
+        assert len(response.assets) == 150
+        assert response.total_entries == 150
+
 
 class TestBackfillOperations:
     backfill_id: int = 1
@@ -290,6 +326,17 @@ class TestConnectionsOperations:
 
         client = make_cli_api_client(transport=httpx.MockTransport(handle_request))
         response = client.connections.list()
+        assert response == self.connections_response
+
+    def test_list_with_pagination(self):
+        def handle_request(request: httpx.Request) -> httpx.Response:
+            assert request.url.path == "/public/connections"
+            assert request.url.params["limit"] == "5"
+            assert request.url.params["offset"] == "10"
+            return httpx.Response(200, json=json.loads(self.connections_response.model_dump_json()))
+
+        client = make_cli_api_client(transport=httpx.MockTransport(handle_request))
+        response = client.connections.list(limit=5, offset=10)
         assert response == self.connections_response
 
     def test_create(self):

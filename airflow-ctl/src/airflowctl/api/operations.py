@@ -152,18 +152,40 @@ class AssetsOperations(BaseOperations):
         except ServerResponseError as e:
             raise e
 
-    def list(self) -> AssetCollectionResponse | ServerResponseError:
-        """List all assets from the API server."""
+    def list(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> AssetCollectionResponse | ServerResponseError:
+        """List all assets from the API server.
+
+        :param limit: Maximum number of assets to return. Overrides the API default limit of 100.
+        :param offset: Index of the first asset to return.
+        """
         try:
-            self.response = self.client.get("assets")
+            params = {}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
+            self.response = self.client.get("assets", params=params or None)
             return AssetCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
             raise e
 
-    def list_by_alias(self) -> AssetAliasCollectionResponse | ServerResponseError:
-        """List all assets by alias from the API server."""
+    def list_by_alias(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> AssetAliasCollectionResponse | ServerResponseError:
+        """List all assets by alias from the API server.
+
+        :param limit: Maximum number of aliases to return. Overrides the API default limit of 100.
+        :param offset: Index of the first alias to return.
+        """
         try:
-            self.response = self.client.get("/assets/aliases")
+            params = {}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
+            self.response = self.client.get("/assets/aliases", params=params or None)
             return AssetAliasCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
             raise e
@@ -204,10 +226,21 @@ class ConnectionsOperations(BaseOperations):
         except ServerResponseError as e:
             raise e
 
-    def list(self) -> ConnectionCollectionResponse | ServerResponseError:
-        """List all connections from the API server."""
+    def list(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> ConnectionCollectionResponse | ServerResponseError:
+        """List all connections from the API server.
+
+        :param limit: Maximum number of connections to return. Overrides the API default limit of 100.
+        :param offset: Index of the first connection to return.
+        """
         try:
-            self.response = self.client.get("connections")
+            params = {}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
+            self.response = self.client.get("connections", params=params or None)
             return ConnectionCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
             raise e
@@ -308,17 +341,30 @@ class DagRunOperations(BaseOperations):
         dag_id: str,
         start_date: datetime.datetime,
         end_date: datetime.datetime,
-        state: str,
-        limit: int,
+        state: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> DAGRunCollectionResponse | ServerResponseError:
-        """List all dag runs."""
+        """List all dag runs.
+
+        :param dag_id: The DAG ID to filter by.
+        :param start_date: Only dag runs after this date are returned.
+        :param end_date: Only dag runs before this date are returned.
+        :param state: Optional state to filter by.
+        :param limit: Maximum number of dag runs to return. Overrides the API default limit of 100.
+        :param offset: Index of the first dag run to return.
+        """
         try:
             params = {
                 "start_date": start_date,
                 "end_date": end_date,
-                "state": state,
-                "limit": limit,
             }
+            if state is not None:
+                params["state"] = state
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
             self.response = self.client.get("dag_runs", params=params)  # type: ignore
             return DAGRunCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
@@ -340,11 +386,27 @@ class JobsOperations(BaseOperations):
     """Job operations."""
 
     def list(
-        self, job_type: str, hostname: str, limit: int, is_alive: bool
+        self,
+        job_type: str,
+        hostname: str,
+        is_alive: bool,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> JobCollectionResponse | ServerResponseError:
-        """List all jobs."""
+        """List all jobs.
+
+        :param job_type: Filter by job type.
+        :param hostname: Filter by hostname.
+        :param is_alive: Filter by alive jobs.
+        :param limit: Maximum number of jobs to return. Overrides the API default limit of 100.
+        :param offset: Index of the first job to return.
+        """
         try:
-            params = {"limit": limit, "job_type": job_type, "hostname": hostname, "is_alive": is_alive}
+            params = {"job_type": job_type, "hostname": hostname, "is_alive": is_alive}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
             self.response = self.client.get("jobs", params=params)  # type: ignore
             return JobCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
@@ -362,10 +424,21 @@ class PoolsOperations(BaseOperations):
         except ServerResponseError as e:
             raise e
 
-    def list(self) -> PoolCollectionResponse | ServerResponseError:
-        """List all pools."""
+    def list(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> PoolCollectionResponse | ServerResponseError:
+        """List all pools.
+
+        :param limit: Maximum number of pools to return. Overrides the API default limit of 100.
+        :param offset: Index of the first pool to return.
+        """
         try:
-            self.response = self.client.get("pools")
+            params = {}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
+            self.response = self.client.get("pools", params=params or None)
             return PoolCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
             raise e
@@ -406,10 +479,21 @@ class PoolsOperations(BaseOperations):
 class ProvidersOperations(BaseOperations):
     """Provider operations."""
 
-    def list(self) -> ProviderCollectionResponse | ServerResponseError:
-        """List all providers."""
+    def list(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> ProviderCollectionResponse | ServerResponseError:
+        """List all providers.
+
+        :param limit: Maximum number of providers to return. Overrides the API default limit of 100.
+        :param offset: Index of the first provider to return.
+        """
         try:
-            self.response = self.client.get("providers")
+            params = {}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
+            self.response = self.client.get("providers", params=params or None)
             return ProviderCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
             raise e
@@ -426,10 +510,21 @@ class VariablesOperations(BaseOperations):
         except ServerResponseError as e:
             raise e
 
-    def list(self) -> VariableCollectionResponse | ServerResponseError:
-        """List all variables."""
+    def list(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> VariableCollectionResponse | ServerResponseError:
+        """List all variables.
+
+        :param limit: Maximum number of variables to return. Overrides the API default limit of 100.
+        :param offset: Index of the first variable to return.
+        """
         try:
-            self.response = self.client.get("variables")
+            params = {}
+            if limit is not None:
+                params["limit"] = limit
+            if offset is not None:
+                params["offset"] = offset
+            self.response = self.client.get("variables", params=params or None)
             return VariableCollectionResponse.model_validate_json(self.response.content)
         except ServerResponseError as e:
             raise e
